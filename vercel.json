@@ -1,5 +1,11 @@
 {
   "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node@3.0.0" }
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node@3.0.0",
+      "config": {
+        "maxDuration": 10
+      }
+    }
   ]
 }
