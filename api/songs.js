@@ -1,10 +1,18 @@
 import { getSongsCatalog, setSongsCatalog } from './_lib/kv.js';
 import { fetchSongs } from './_lib/phishnet.js';
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 's-maxage=3600, stale-while-revalidate',
+    },
+  });
+}
 
+export default async function handler() {
   try {
     let songs = await getSongsCatalog();
 
@@ -13,9 +21,11 @@ export default async function handler(req, res) {
       await setSongsCatalog(songs);
     }
 
-    res.json({ songs });
+    return json({ songs });
   } catch (err) {
     console.error('GET /api/songs error:', err);
-    res.status(500).json({ error: err.message });
+    return json({ error: err.message }, 500);
   }
 }
+
+export const config = { runtime: 'edge' };

@@ -11,40 +11,39 @@ export const KEYS = {
   CACHE_SEEDING_PROGRESS: 'cache:seeding_progress',
 };
 
+// @vercel/kv automatically serializes/deserializes JSON — do NOT wrap with
+// JSON.stringify/JSON.parse or you'll get double-encoding and [object Object] errors.
+
 export async function getShowsIndex() {
-  const data = await kv.get(KEYS.SHOWS_INDEX);
-  return data ? JSON.parse(data) : null;
+  return (await kv.get(KEYS.SHOWS_INDEX)) ?? null;
 }
 
 export async function setShowsIndex(shows) {
-  await kv.set(KEYS.SHOWS_INDEX, JSON.stringify(shows));
+  await kv.set(KEYS.SHOWS_INDEX, shows);
 }
 
 export async function getShowsForYear(year) {
-  const data = await kv.get(KEYS.SHOWS_YEAR(year));
-  return data ? JSON.parse(data) : null;
+  return (await kv.get(KEYS.SHOWS_YEAR(year))) ?? null;
 }
 
 export async function setShowsForYear(year, shows) {
-  await kv.set(KEYS.SHOWS_YEAR(year), JSON.stringify(shows));
+  await kv.set(KEYS.SHOWS_YEAR(year), shows);
 }
 
 export async function getShow(date) {
-  const data = await kv.get(KEYS.SHOW(date));
-  return data ? JSON.parse(data) : null;
+  return (await kv.get(KEYS.SHOW(date))) ?? null;
 }
 
 export async function setShow(date, showData) {
-  await kv.set(KEYS.SHOW(date), JSON.stringify(showData));
+  await kv.set(KEYS.SHOW(date), showData);
 }
 
 export async function getSongsCatalog() {
-  const data = await kv.get(KEYS.SONGS_CATALOG);
-  return data ? JSON.parse(data) : null;
+  return (await kv.get(KEYS.SONGS_CATALOG)) ?? null;
 }
 
 export async function setSongsCatalog(songs) {
-  await kv.set(KEYS.SONGS_CATALOG, JSON.stringify(songs));
+  await kv.set(KEYS.SONGS_CATALOG, songs);
 }
 
 export async function getCacheStatus() {
@@ -54,16 +53,16 @@ export async function getCacheStatus() {
     kv.get(KEYS.CACHE_SEEDING_PROGRESS),
   ]);
   return {
-    lastUpdated: lastUpdated || null,
-    seedingStatus: seedingStatus || 'idle',
-    seedingProgress: seedingProgress ? JSON.parse(seedingProgress) : null,
+    lastUpdated: lastUpdated ?? null,
+    seedingStatus: seedingStatus ?? 'idle',
+    seedingProgress: seedingProgress ?? null,
   };
 }
 
 export async function setSeedingStatus(status, progress = null) {
   await kv.set(KEYS.CACHE_SEEDING_STATUS, status);
   if (progress !== null) {
-    await kv.set(KEYS.CACHE_SEEDING_PROGRESS, JSON.stringify(progress));
+    await kv.set(KEYS.CACHE_SEEDING_PROGRESS, progress);
   }
 }
 
