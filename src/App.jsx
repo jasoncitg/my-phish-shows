@@ -14,7 +14,7 @@ export default function App() {
   const [seeding, setSeeding] = useState(false);
 
   const { selectedShows, addShow, removeShow, isSelected } = useSelectedShows();
-  const { years, showsByYear, songs, loading: showsLoading, getShowsForYear } = useShowsData();
+  const { years, showsByYear, songs, loading: showsLoading, error: showsError, getShowsForYear } = useShowsData();
 
   // Poll cache status on load
   useEffect(() => {
@@ -84,6 +84,14 @@ export default function App() {
               <div className="calendar-main">
                 {showsLoading ? (
                   <div className="loading-years">Loading show history…</div>
+                ) : showsError && years.length === 0 ? (
+                  <div className="api-error">
+                    <p>⚠️ Could not load show data.</p>
+                    <p className="api-error-detail">{showsError}</p>
+                    <button className="btn btn-back" onClick={() => window.location.reload()}>
+                      Retry
+                    </button>
+                  </div>
                 ) : (
                   <Calendar
                     years={years}

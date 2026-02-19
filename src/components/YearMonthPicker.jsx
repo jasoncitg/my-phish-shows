@@ -34,7 +34,15 @@ export default function YearMonthPicker({ year, month, years, onChange }) {
       <button className="nav-arrow" onClick={prevMonth} title="Previous month">‹</button>
 
       <div className="picker-center">
-        <select className="year-select" value={year} onChange={handleYearChange}>
+        <select
+          className="year-select"
+          value={sortedYears.length > 0 ? year : ''}
+          onChange={handleYearChange}
+          disabled={sortedYears.length === 0}
+        >
+          {sortedYears.length === 0 && (
+            <option value="" disabled>Loading years…</option>
+          )}
           {sortedYears.map((y) => (
             <option key={y.year} value={y.year}>
               {y.year} ({y.count} shows)

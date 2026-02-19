@@ -562,6 +562,18 @@ html, body, #root {
 /* ─── Misc ───────────────────────────────────────────────────────────── */
 .loading-years { padding: 60px; text-align: center; color: var(--text-dim); animation: pulse 1.5s infinite; }
 
+.api-error {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.api-error p { margin: 0; }
+.api-error-detail { font-size: 13px; color: var(--text-faint); font-style: italic; }
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

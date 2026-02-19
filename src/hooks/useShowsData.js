@@ -9,17 +9,42 @@ export function useShowsData() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function loadYears() {
+    let cancelled = false;
+
+    async function loadYears(attempt = 0) {
       try {
         const data = await api.getYears();
-        setYears(data.years || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
+        if (cancelled) return;
+
+        if (data.seeding) {
+          // KV is being seeded; retry after a short delay (up to 5 attempts)
+          if (attempt < 5) {
+            setTimeout(() => loadYears(attempt + 1), 3000);
+          } else {
+            setError('Data is still loading on the server. Please refresh in a moment.');
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (!data.years || data.years.length === 0) {
+          setError('No show data returned from API. The cache may still be seeding.');
+          setLoading(false);
+          return;
+        }
+
+        setYears(data.years);
         setLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message);
+          setLoading(false);
+        }
       }
     }
+
     loadYears();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

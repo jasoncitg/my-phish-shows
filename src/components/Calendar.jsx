@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import YearMonthPicker from './YearMonthPicker.jsx';
 import ShowDetailDrawer from './ShowDetailDrawer.jsx';
 
@@ -18,6 +18,15 @@ export default function Calendar({ years, showsByYear, getShowsForYear, isSelect
   const [selectedShow, setSelectedShow] = useState(null);
   const [loadingYear, setLoadingYear] = useState(false);
 
+  // Track current viewMonth in a ref so the load effect can read it without
+  // being re-triggered every time the month changes.
+  const viewMonthRef = useRef(viewMonth);
+  useEffect(() => { viewMonthRef.current = viewMonth; }, [viewMonth]);
+
+  // When viewYear changes, mark that we should auto-navigate to the best month.
+  const shouldAutoNavMonth = useRef(true);
+  useEffect(() => { shouldAutoNavMonth.current = true; }, [viewYear]);
+
   // Update default year when years load
   useEffect(() => {
     if (years.length > 0) {
@@ -26,13 +35,48 @@ export default function Calendar({ years, showsByYear, getShowsForYear, isSelect
     }
   }, [years.length]);
 
-  // Load shows for the current view year
+  // Load shows for the current view year; auto-navigate to last month with shows
   useEffect(() => {
     if (!showsByYear[viewYear]) {
       setLoadingYear(true);
-      getShowsForYear(viewYear).finally(() => setLoadingYear(false));
+      getShowsForYear(viewYear)
+        .then((shows) => {
+          if (shouldAutoNavMonth.current && shows && shows.length > 0) {
+            const curMonth = viewMonthRef.current;
+            const hasShows = shows.some(
+              (s) => parseInt(s.showdate.slice(5, 7), 10) - 1 === curMonth
+            );
+            if (!hasShows) {
+              // Navigate to the most recent month that has shows
+              const sorted = [...shows].sort((a, b) =>
+                b.showdate.localeCompare(a.showdate)
+              );
+              setViewMonth(parseInt(sorted[0].showdate.slice(5, 7), 10) - 1);
+            }
+            shouldAutoNavMonth.current = false;
+          }
+        })
+        .finally(() => setLoadingYear(false));
     }
   }, [viewYear, showsByYear, getShowsForYear]);
+
+  // If shows are already cached for this year, still run auto-nav if needed
+  useEffect(() => {
+    const shows = showsByYear[viewYear];
+    if (shouldAutoNavMonth.current && shows && shows.length > 0) {
+      const curMonth = viewMonthRef.current;
+      const hasShows = shows.some(
+        (s) => parseInt(s.showdate.slice(5, 7), 10) - 1 === curMonth
+      );
+      if (!hasShows) {
+        const sorted = [...shows].sort((a, b) =>
+          b.showdate.localeCompare(a.showdate)
+        );
+        setViewMonth(parseInt(sorted[0].showdate.slice(5, 7), 10) - 1);
+      }
+      shouldAutoNavMonth.current = false;
+    }
+  }, [viewYear, showsByYear]);
 
   const showsThisYear = showsByYear[viewYear] || [];
 
