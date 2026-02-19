@@ -1,11 +1,7 @@
 {
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node@3.0.0",
-      "config": {
-        "maxDuration": 10
-      }
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
-  ]
+  }
 }
